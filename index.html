@@ -3,11 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus: The Cognitive Labyrinth</title>
-    <style src="styles.css"></style>
+    <title>Logic Labyrinth</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <div id="game-container">
+        <h1>Logic Labyrinth</h1>
+        <div id="stats">
+            <span id="level">Level: 1</span>
+            <span id="score">Score: 0</span>
+        </div>
+        <div id="puzzle-area"></div>
+        <div id="controls">
+            <button id="submit-btn">Submit Answer</button>
+            <button id="next-btn" style="display: none;">Next Puzzle</button>
+        </div>
+    </div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <p id="modal-message"></p>
+            <button id="modal-close">Close</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

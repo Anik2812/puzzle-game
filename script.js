@@ -1,198 +1,213 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.createElement('canvas');
-    document.body.appendChild(canvas);
+class SynapticSurge {
+    constructor() {
+        this.level = 1;
+        this.score = 0;
+        this.time = 60;
+        this.gridSize = 4;
+        this.grid = [];
+        this.selectedCells = [];
+        this.operations = ['+', '-', '*', '/'];
+        this.gameBoard = document.getElementById('game-board');
+        this.levelDisplay = document.getElementById('level');
+        this.scoreDisplay = document.getElementById('score');
+        this.timeDisplay = document.getElementById('time');
+        this.startButton = document.getElementById('start-button');
+        this.hintButton = document.getElementById('hint-button');
+        this.modal = document.getElementById('modal');
+        this.modalTitle = document.getElementById('modal-title');
+        this.modalMessage = document.getElementById('modal-message');
+        this.modalClose = document.getElementById('modal-close');
 
-    const uiContainer = document.createElement('div');
-    uiContainer.id = 'ui-container';
-    document.body.appendChild(uiContainer);
+        this.startButton.addEventListener('click', () => this.startGame());
+        this.hintButton.addEventListener('click', () => this.useHint());
+        this.modalClose.addEventListener('click', () => this.closeModal());
 
-    const scoreElement = document.createElement('div');
-    scoreElement.id = 'score';
-    uiContainer.appendChild(scoreElement);
-
-    const levelElement = document.createElement('div');
-    levelElement.id = 'level';
-    uiContainer.appendChild(levelElement);
-
-    const messageElement = document.createElement('div');
-    messageElement.id = 'message';
-    uiContainer.appendChild(messageElement);
-
-    const style = document.createElement('style');
-    style.textContent = `
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-        #ui-container { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial, sans-serif; }
-        #score, #level { font-size: 18px; margin-bottom: 5px; }
-        #message { font-size: 24px; font-weight: bold; margin-top: 20px; }
-    `;
-    document.head.appendChild(style);
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    let score = 0;
-    let level = 1;
-    let puzzleCubes = [];
-    let selectedCube = null;
-    const mainCube = createMainCube();
-    scene.add(mainCube);
-
-    camera.position.z = 5;
-
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(1, 1, 1);
-    scene.add(directionalLight);
-
-    const particles = createParticles();
-    scene.add(particles);
-
-    initGame();
-
-    function animate() {
-        requestAnimationFrame(animate);
-
-        mainCube.rotation.x += 0.005;
-        mainCube.rotation.y += 0.005;
-
-        puzzleCubes.forEach(cube => {
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-        });
-
-        const positions = particles.geometry.attributes.position.array;
-        for (let i = 0; i < positions.length; i += 3) {
-            positions[i + 1] -= 0.01;
-            if (positions[i + 1] < -5) positions[i + 1] = 5;
-        }
-        particles.geometry.attributes.position.needsUpdate = true;
-
-        renderer.render(scene, camera);
+        // Initialize the game board
+        this.createGrid();
+        this.updateDisplay();
     }
 
-    animate();
-
-    function initGame() {
-        createPuzzleCubes();
-        updateUI();
+    startGame() {
+        this.level = 1;
+        this.score = 0;
+        this.time = 60;
+        this.gridSize = 4;
+        this.updateDisplay();
+        this.createGrid();
+        this.startTimer();
+        this.startButton.disabled = true;
+        this.hintButton.disabled = false;
+        this.showModal('Game Started', 'Select three cells to form a valid equation!');
     }
 
-    function createMainCube() {
-        const geometry = new THREE.BoxGeometry(2, 2, 2);
-        const materials = [
-            new THREE.MeshPhongMaterial({color: 0xff0000}),
-            new THREE.MeshPhongMaterial({color: 0x00ff00}),
-            new THREE.MeshPhongMaterial({color: 0x0000ff}),
-            new THREE.MeshPhongMaterial({color: 0xffff00}),
-            new THREE.MeshPhongMaterial({color: 0xff00ff}),
-            new THREE.MeshPhongMaterial({color: 0x00ffff})
-        ];
-        return new THREE.Mesh(geometry, materials);
-    }
+    createGrid() {
+        this.gameBoard.innerHTML = '';
+        this.gameBoard.style.gridTemplateColumns = `repeat(${this.gridSize}, 1fr)`;
+        this.grid = [];
+        this.selectedCells = [];
 
-    function createPuzzleCubes() {
-        for (let i = 0; i < 5; i++) {
-            const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-            const material = new THREE.MeshPhongMaterial({color: 0xffffff});
-            const puzzleCube = new THREE.Mesh(geometry, material);
-            puzzleCube.position.set(
-                Math.random() * 4 - 2,
-                Math.random() * 4 - 2,
-                Math.random() * 4 - 2
-            );
-            puzzleCubes.push(puzzleCube);
-            scene.add(puzzleCube);
+        for (let i = 0; i < this.gridSize; i++) {
+            let row = [];
+            for (let j = 0; j < this.gridSize; j++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.textContent = this.generateCellContent();
+                cell.addEventListener('click', () => this.selectCell(i, j));
+                this.gameBoard.appendChild(cell);
+                row.push(cell.textContent);
+            }
+            this.grid.push(row);
         }
     }
 
-    function createParticles() {
-        const geometry = new THREE.BufferGeometry();
-        const vertices = [];
-        for (let i = 0; i < 5000; i++) {
-            vertices.push(
-                Math.random() * 10 - 5,
-                Math.random() * 10 - 5,
-                Math.random() * 10 - 5
-            );
-        }
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        const material = new THREE.PointsMaterial({color: 0xffffff, size: 0.05});
-        return new THREE.Points(geometry, material);
-    }
-
-    function updateUI() {
-        scoreElement.textContent = `Score: ${score}`;
-        levelElement.textContent = `Level: ${level}`;
-    }
-
-    function checkPuzzleSolved() {
-        const tolerance = 0.1 * (1 / level);
-        return puzzleCubes.every(cube => 
-            Math.abs(cube.position.x) < tolerance &&
-            Math.abs(cube.position.y) < tolerance &&
-            Math.abs(cube.position.z) < tolerance
-        );
-    }
-
-    function handlePuzzleSolved() {
-        score += level * 100;
-        level++;
-        messageElement.textContent = `Level ${level - 1} Complete!`;
-        setTimeout(() => {
-            messageElement.textContent = '';
-            scene.remove(...puzzleCubes);
-            puzzleCubes = [];
-            createPuzzleCubes();
-        }, 2000);
-        updateUI();
-    }
-
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    canvas.addEventListener('mousedown', onMouseDown);
-    canvas.addEventListener('mouseup', onMouseUp);
-    canvas.addEventListener('mousemove', onMouseMove);
-
-    function onMouseDown(event) {
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2(
-            (event.clientX / window.innerWidth) * 2 - 1,
-            -(event.clientY / window.innerHeight) * 2 + 1
-        );
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(puzzleCubes);
-        if (intersects.length > 0) {
-            selectedCube = intersects[0].object;
+    generateCellContent() {
+        if (Math.random() < 0.7) {
+            return Math.floor(Math.random() * 9) + 1;
+        } else {
+            return this.operations[Math.floor(Math.random() * this.operations.length)];
         }
     }
 
-    function onMouseUp() {
-        selectedCube = null;
-        if (checkPuzzleSolved()) {
-            handlePuzzleSolved();
+    selectCell(row, col) {
+        let cell = this.gameBoard.children[row * this.gridSize + col];
+        if (cell.classList.contains('selected')) {
+            cell.classList.remove('selected');
+            this.selectedCells = this.selectedCells.filter(c => c[0] !== row || c[1] !== col);
+        } else {
+            cell.classList.add('selected');
+            this.selectedCells.push([row, col]);
+        }
+
+        if (this.selectedCells.length === 3) {
+            this.checkEquation();
         }
     }
 
-    function onMouseMove(event) {
-        if (selectedCube) {
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2(
-                (event.clientX / window.innerWidth) * 2 - 1,
-                -(event.clientY / window.innerHeight) * 2 + 1
-            );
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(mainCube);
-            if (intersects.length > 0) {
-                selectedCube.position.copy(intersects[0].point);
+    checkEquation() {
+        let values = this.selectedCells.map(([row, col]) => this.grid[row][col]);
+        let numbersCount = values.filter(v => !isNaN(v)).length;
+
+        if (numbersCount !== 2 || values.includes('/')) {
+            this.showModal('Invalid Selection', 'Please select two numbers and one operation.');
+            this.resetSelection();
+            return;
+        }
+
+        let equation = values.join(' ');
+        let result = eval(equation);
+
+        if (!isNaN(result) && result % 1 === 0) {
+            this.score += 10 * this.level;
+            this.showModal('Correct!', `${equation} = ${result}`);
+            this.updateCells();
+        } else {
+            this.showModal('Incorrect', 'Try again!');
+        }
+
+        this.resetSelection();
+        this.updateDisplay();
+        this.checkLevelUp();
+    }
+
+    updateCells() {
+        for (let [row, col] of this.selectedCells) {
+            this.grid[row][col] = this.generateCellContent();
+            this.gameBoard.children[row * this.gridSize + col].textContent = this.grid[row][col];
+        }
+    }
+
+    resetSelection() {
+        for (let [row, col] of this.selectedCells) {
+            this.gameBoard.children[row * this.gridSize + col].classList.remove('selected');
+        }
+        this.selectedCells = [];
+    }
+
+    checkLevelUp() {
+        if (this.score >= this.level * 100) {
+            this.level++;
+            this.time = 60;
+            if (this.level % 2 === 0 && this.gridSize < 6) {
+                this.gridSize++;
+                this.createGrid();
+            }
+            this.showModal('Level Up!', `You've reached level ${this.level}!`);
+        }
+    }
+
+    startTimer() {
+        clearInterval(this.timer);
+        this.timer = setInterval(() => {
+            this.time--;
+            this.updateDisplay();
+            if (this.time <= 0) {
+                clearInterval(this.timer);
+                this.endGame();
+            }
+        }, 1000);
+    }
+
+    endGame() {
+        this.showModal('Game Over', `Your final score is ${this.score}`);
+        this.startButton.disabled = false;
+        this.hintButton.disabled = true;
+    }
+
+    useHint() {
+        let validCombinations = [];
+        for (let i = 0; i < this.gridSize; i++) {
+            for (let j = 0; j < this.gridSize; j++) {
+                if (!isNaN(this.grid[i][j])) {
+                    for (let k = 0; k < this.gridSize; k++) {
+                        for (let l = 0; l < this.gridSize; l++) {
+                            if (k !== i && l !== j && !isNaN(this.grid[k][l])) {
+                                for (let op of this.operations) {
+                                    let equation = `${this.grid[i][j]} ${op} ${this.grid[k][l]}`;
+                                    let result = eval(equation);
+                                    if (!isNaN(result) && result % 1 === 0) {
+                                        validCombinations.push([[i, j], [k, l], op]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        if (validCombinations.length > 0) {
+            let hint = validCombinations[Math.floor(Math.random() * validCombinations.length)];
+            this.showModal('Hint', `Try using the numbers at (${hint[0][0]},${hint[0][1]}) and (${hint[1][0]},${hint[1][1]}) with the ${hint[2]} operation.`);
+        } else {
+            this.showModal('No Hint Available', 'There are no valid combinations. The board will be refreshed.');
+            this.createGrid();
+        }
+
+        this.hintButton.disabled = true;
+        setTimeout(() => this.hintButton.disabled = false, 30000);
     }
-});
+
+    updateDisplay() {
+        this.levelDisplay.textContent = `Level: ${this.level}`;
+        this.scoreDisplay.textContent = `Score: ${this.score}`;
+        this.timeDisplay.textContent = `Time: ${this.time}`;
+    }
+
+    showModal(title, message) {
+        this.modalTitle.textContent = title;
+        this.modalMessage.textContent = message;
+        this.modal.style.display = 'block';
+    }
+
+    closeModal() {
+        this.modal.style.display = 'none';
+    }
+}
+
+// Initialize the game
+const game = new SynapticSurge();
+window.onclick = function(event) {
+    if (event.target == game.modal) {
+        game.closeModal();
+    }
+}
