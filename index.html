@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logic Labyrinth</title>
+    <title>Cerebral Nexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="game-container">
-        <h1>Logic Labyrinth</h1>
+        <h1>Cerebral Nexus</h1>
         <div id="stats">
-            <span id="level">Level: 1</span>
-            <span id="score">Score: 0</span>
+            <div id="level">Level: 1</div>
+            <div id="score">Score: 0</div>
+            <div id="timer">Time: 60</div>
         </div>
         <div id="puzzle-area"></div>
         <div id="controls">
-            <button id="submit-btn">Submit Answer</button>
-            <button id="next-btn" style="display: none;">Next Puzzle</button>
+            <button id="submit-btn" class="glow-button">Submit Answer</button>
+            <button id="next-btn" class="glow-button" style="display: none;">Next Puzzle</button>
         </div>
     </div>
     <div id="modal" class="modal">
         <div class="modal-content">
             <h2 id="modal-title"></h2>
             <p id="modal-message"></p>
-            <button id="modal-close">Close</button>
+            <button id="modal-close" class="glow-button">Close</button>
         </div>
     </div>
     <script src="script.js"></script>

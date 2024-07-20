@@ -1,19 +1,39 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Orbitron', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background: linear-gradient(45deg, #0a0a1a, #1a1a3e, #2a2a5e);
+    color: #f0f0f0;
 }
 
 #game-container {
-    background-color: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     text-align: center;
+    max-width: 600px;
+    width: 90%;
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #00ffff;
+    color: #00ffff;
+}
+
+#stats {
+    display: flex;
+    justify-content: space-around;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 10px;
 }
 
 #puzzle-area {
@@ -22,13 +42,29 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
 }
 
-button {
+.glow-button {
     margin: 10px;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 1em;
     cursor: pointer;
+    background-color: #00ffff;
+    color: #0a0a1a;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.glow-button:hover {
+    box-shadow: 0 0 10px #00ffff;
+    transform: scale(1.05);
 }
 
 .modal {
@@ -40,20 +76,23 @@ button {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
-    background-color: #fefefe;
+    background-color: #1a1a3e;
     margin: 15% auto;
     padding: 20px;
-    border: 1px solid #888;
+    border: 1px solid #00ffff;
     width: 80%;
     max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
 }
 
 #modal-close {
-    color: #aaa;
+    color: #00ffff;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -65,6 +104,121 @@ button {
 }
 
 input[type="text"], input[type="number"] {
-    padding: 5px;
-    font-size: 16px;
+    padding: 10px;
+    font-size: 1em;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid #00ffff;
+    color: #f0f0f0;
+    border-radius: 5px;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.option input[type="radio"] {
+    margin-right: 10px;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.puzzle-question {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #00ffff;
+}
+
+.puzzle-sequence, .puzzle-pattern {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #f0f0f0;
+}
+
+.puzzle-input {
+    font-size: 1.2em;
+    padding: 10px;
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
+}
+
+.puzzle-option {
+    text-align: left;
+    margin: 10px 0;
+}
+
+.hint-button {
+    background-color: #ff00ff;
+    color: #0a0a1a;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    margin-top: 10px;
+}
+
+.hint-button:hover {
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+.puzzle-image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 15px;
+    border-radius: 10px;
+}
+
+.correct-answer {
+    animation: correctPulse 0.5s;
+}
+
+@keyframes correctPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); background-color: rgba(0, 255, 0, 0.2); }
+    100% { transform: scale(1); }
+}
+
+.wrong-answer {
+    animation: wrongShake 0.5s;
+}
+
+@keyframes wrongShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
+}
+
+.updated {
+    animation: updatePulse 0.5s;
+}
+
+@keyframes updatePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); color: #00ffff; }
+    100% { transform: scale(1); }
 }
